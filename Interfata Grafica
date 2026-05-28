@@ -1,0 +1,123 @@
+import processing.serial.*;
+
+Serial myPort;
+String data="";
+int iAngle, iDistance;
+
+void setup() {
+  size(1200, 700); 
+  smooth();
+  
+  // Te conectezi automat la COM5 (care e pe poziția 0 la tine)
+  myPort = new Serial(this, Serial.list()[0], 9600); 
+  myPort.bufferUntil('\n'); 
+}
+
+void draw() {
+  fill(0, 10);
+  noStroke();
+  rect(0, 0, width, height - height * 0.08);
+
+  drawRadar();
+  drawLine();
+  drawObject();
+  drawText();
+}
+
+void serialEvent (Serial myPort) {
+  try {
+    data = myPort.readStringUntil('\n');
+    if (data != null) {
+      data = trim(data); 
+      
+      // SPIONUL: Asta va scrie datele în spațiul negru de jos ca să le vezi!
+      println("Primesc de la Arduino: " + data); 
+      
+      String[] values = split(data, ','); 
+      if (values.length == 2) {
+        iAngle = int(values[0]);
+        iDistance = int(values[1]);
+      }
+    }
+  } catch (Exception e) {}
+}
+
+void drawRadar() {
+  pushMatrix();
+  translate(width/2, height - height*0.08);
+  noFill();
+  strokeWeight(2);
+  stroke(98, 245, 31);
+  float r40 = width * 0.45;
+  
+  arc(0, 0, r40*2, r40*2, PI, TWO_PI);
+  arc(0, 0, (r40*0.75)*2, (r40*0.75)*2, PI, TWO_PI);
+  arc(0, 0, (r40*0.5)*2, (r40*0.5)*2, PI, TWO_PI);
+  arc(0, 0, (r40*0.25)*2, (r40*0.25)*2, PI, TWO_PI);
+  
+  for(int i = 0; i <= 180; i += 30) {
+    line(0, 0, r40 * cos(radians(i)), -r40 * sin(radians(i)));
+  }
+  popMatrix();
+}
+
+void drawLine() {
+  pushMatrix();
+  translate(width/2, height - height*0.08);
+  strokeWeight(9);
+
+  // Dacă detectează obiect -> roșu
+  if(iDistance > 0 && iDistance <= 30) {
+    stroke(255, 0, 0);
+  } 
+  // Dacă nu detectează -> verde
+  else {
+    stroke(30, 250, 60);
+  }
+
+  float r40 = width * 0.45;
+  float distPix = r40;
+
+  if(iDistance > 0 && iDistance <= 40) {
+    distPix = iDistance * (r40 / 40.0);
+  }
+
+  line(0, 0,
+       distPix * cos(radians(iAngle)),
+       -distPix * sin(radians(iAngle)));
+
+  popMatrix();
+}
+
+void drawObject() {
+  pushMatrix();
+  translate(width/2, height - height*0.08);
+  strokeWeight(9);
+  stroke(255, 10, 10);
+  float r40 = width * 0.45;
+  
+  if (iDistance > 0 && iDistance <= 30) {
+    float distPix = iDistance * (r40 / 40.0);
+    line(distPix * cos(radians(iAngle)), -distPix * sin(radians(iAngle)),
+         r40 * cos(radians(iAngle)), -r40 * sin(radians(iAngle)));
+  }
+  popMatrix();
+}
+
+void drawText() {
+  pushMatrix();
+  translate(width/2, height - height*0.08);
+  fill(98, 245, 31);
+  textSize(15);
+  float r40 = width * 0.45;
+  text("10cm", (r40*0.25) + 5, 20);
+  text("20cm", (r40*0.50) + 5, 20);
+  text("30cm", (r40*0.75) + 5, 20);
+  text("40cm", r40 + 5, 20);
+  
+  textSize(20);
+  for(int i = 30; i <= 150; i += 30) {
+    text(i + "°", (r40 + 20) * cos(radians(i)) - 15, -(r40 + 20) * sin(radians(i)));
+  }
+  popMatrix();
+}
