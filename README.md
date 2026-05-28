@@ -65,7 +65,7 @@ Utilizând terminalul VS Code:
 ## 6. Concluzii
 Acest proiect a permis înțelegerea modului în care hardware-ul și software-ul conlucrează pentru a forma un sistem embedded funcțional. Provocările întâmpinate în comunicarea serială și gestionarea resurselor au contribuit la dezvoltarea abilităților de debugging și arhitectură software.
 
-STUDENTI: Cioponea Ionut-Sebastian
+STUDENTI: Cioponea Ionut-Sebastian si
           Braitor Ana-Maria
 
 GRUPA: AIA 3.1
